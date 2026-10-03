@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a22">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.webmanifest">
+    <title>Jarvis</title>
+    <link rel="stylesheet" href="panel.css">
+  </head>
+  <body>
+    <main class="interface">
+      <header class="header">
+        <div class="brand">JARVIS<span class="brand-dot"> / AT YOUR SERVICE</span></div>
+        <div class="system-state"><span class="state-light"></span><span id="system-state">READY</span></div>
+      </header>
+
+      <section class="stage" aria-label="Interactive three-dimensional particle orb">
+        <canvas id="orb" width="360" height="360" role="button" tabindex="0"
+          aria-label="Jarvis particle orb. Click to start or stop voice listening. Drag to rotate; scroll to zoom and change particle spread."></canvas>
+        <div class="orb-instruction">DRAG TO ROTATE <span>·</span> SCROLL TO RESHAPE <span>·</span> TAP TO SPEAK</div>
+      </section>
+
+      <section class="conversation" aria-live="polite" aria-atomic="false">
+        <div id="status" class="status">JARVIS IS READY</div>
+        <div id="transcript" class="transcript"></div>
+        <div id="answer" class="answer">Hello. I'm here. What would you like to talk about?</div>
+      </section>
+
+      <div class="controls" aria-label="Voice and text controls">
+        <button id="voice-toggle" class="action-button" type="button">Talk to Jarvis</button>
+        <button id="manual-toggle" class="action-button secondary" type="button">Type a message</button>
+      </div>
+
+      <div id="manual-input-wrap" class="manual-input-wrap" aria-live="polite">
+        <input id="manual-input" type="text" maxlength="200" placeholder="Say something or ask a question..." />
+        <button id="manual-submit" class="action-button" type="button">Send</button>
+      </div>
+
+      <details class="api-settings">
+        <summary>Connect conversational AI</summary>
+        <form id="api-key-form">
+          <label for="api-key">Google Gemini API key</label>
+          <div class="api-key-controls">
+            <input id="api-key" type="password" autocomplete="off" placeholder="Paste your API key" required />
+            <button class="action-button" type="submit">Save key</button>
+          </div>
+          <div id="api-key-status" class="api-key-status" role="status">Get a key from Google AI Studio. It stays in this browser and is sent directly to Google.</div>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Get a Google Gemini API key</a>
+        </form>
+      </details>
+
+      <footer class="footer">
+        <span>VOICE · GEMINI CONVERSATION · BROWSER COMMANDS</span>
+      </footer>
+    </main>
+    <script src="panel.js"></script>
+  </body>
+</html>

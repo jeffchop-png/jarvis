@@ -1,0 +1,20 @@
+{
+  "name": "Jarvis",
+  "short_name": "Jarvis",
+  "description": "Jarvis voice assistant for mobile browsers.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101a22",
+  "theme_color": "#101a22",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

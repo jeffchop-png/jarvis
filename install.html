@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a22">
+    <link rel="manifest" href="manifest.webmanifest">
+    <title>Install Jarvis</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background: #101a22;
+        color: #edf2ee;
+        font-synthesis: none;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: radial-gradient(ellipse at 15% 0%, #22443e 0, transparent 42%), #101a22;
+      }
+
+      main {
+        width: min(720px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 56px 0 64px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: #a2d7a8;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 8vw, 4.2rem);
+        line-height: 1;
+      }
+
+      .intro {
+        max-width: 560px;
+        margin: 18px 0 28px;
+        color: #c3cfca;
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+
+      .download {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 4px;
+        background: #a2d7a8;
+        color: #10211a;
+        font-size: 1rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .install-button {
+        display: inline-flex;
+        min-height: 50px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 8px;
+        background: linear-gradient(180deg, #82d3a0, #5cba84);
+        color: #0b1d16;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+
+      .download:hover { background: #c0edc2; }
+      .download:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+      .toggle {
+        margin: 20px 0 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(136, 202, 158, 0.5);
+        border-radius: 999px;
+        background: rgba(13, 25, 32, 0.7);
+        color: #dfeef0;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .note {
+        margin: 14px 0 40px;
+        color: #aebcb7;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: 1.35rem;
+      }
+
+      ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: install-step;
+      }
+
+      li {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 14px;
+        padding: 17px 0;
+        border-top: 1px solid #34434a;
+        color: #c3cfca;
+        line-height: 1.55;
+        counter-increment: install-step;
+      }
+
+      li::before {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border: 1px solid #668875;
+        border-radius: 50%;
+        color: #a2d7a8;
+        content: counter(install-step);
+        font-weight: 700;
+      }
+
+      strong { color: #edf2ee; }
+      code { color: #d4e5d5; }
+
+      @media (max-width: 480px) {
+        main { padding-top: 36px; }
+        .intro { font-size: 1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">JARVIS · Chrome extension</p>
+      <h1>Install Jarvis</h1>
+      <div id="phone-view">
+        <p class="intro">For your Motorola and Chrome Beta setup, the easiest method is to use Jarvis as a phone web app instead of an extension. Android browsers do not support unpacked extensions the way desktop Chrome does.</p>
+        <p class="note">Open the app in your browser, then tap the menu and choose <strong>Add to Home screen</strong> or <strong>Install app</strong>. This gives you a cleaner phone-friendly install path.</p>
+        <button id="install-app" class="install-button" type="button">Install Jarvis app</button>
+        <a class="download" href="index.html">Open Jarvis on your phone</a>
+        <p class="note">This is the simpler option for your phone. It works in Chrome Beta and gives you a quick launcher without the desktop extension workflow. If your browser only offers <strong>Create shortcut</strong>, that is the Android fallback and still works as a home-screen app.</p>
+      </div>
+
+      <div id="desktop-view" style="display:none;">
+        <p class="intro">If you still want the desktop extension version, download the package, extract it, and load its folder in Chrome. This setup takes a few minutes and is for a computer.</p>
+        <p class="note">Chrome requires this one-time unpacked-extension step for downloads outside the Chrome Web Store. Keep the extracted folder where it is; Chrome loads the extension from that folder.</p>
+        <a class="download" href="jarvis-extension.zip" download>Download Jarvis for Chrome</a>
+      </div>
+
+      <button id="toggle-mode" class="toggle" type="button" aria-label="Switch between phone and computer install steps">Switch to computer instructions</button>
+
+      <section aria-labelledby="steps-heading">
+        <h2 id="steps-heading">Install steps</h2>
+        <ol id="install-steps">
+          <li><span><strong>Open the mobile app page</strong> in Chrome Beta on your Motorola. This is the recommended path for your phone.</span></li>
+          <li><span><strong>Try the menu</strong> in Chrome Beta and choose <strong>Add to Home screen</strong> or <strong>Install app</strong>. If your browser only offers <strong>Create shortcut</strong>, select that — it is the normal Android fallback.</span></li>
+          <li><span><strong>Open the new app shortcut</strong> from your home screen. It runs Jarvis as a browser-based app and keeps the orb interface working on your phone.</span></li>
+          <li><span><strong>If you want the desktop extension</strong>, open <code>chrome://extensions</code> on a computer, enable <strong>Developer mode</strong>, and select <strong>Load unpacked</strong>.</span></li>
+          <li><span><strong>Choose the extracted folder</strong> with <code>manifest.json</code> in it. Use the extracted <code>jarvis-extension</code> folder, not the ZIP file itself.</span></li>
+        </ol>
+      </section>
+      <script>
+        const toggleMode = document.getElementById('toggle-mode');
+        const phoneView = document.getElementById('phone-view');
+        const desktopView = document.getElementById('desktop-view');
+        const installAppButton = document.getElementById('install-app');
+        let desktopMode = false;
+        let installPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+          event.preventDefault();
+          installPrompt = event;
+          installAppButton.hidden = false;
+        });
+
+        installAppButton.addEventListener('click', async () => {
+          if (!installPrompt) {
+            alert('Use the Chrome menu: tap ⋮ then Add to Home screen or Install app.');
+            return;
+          }
+          installPrompt.prompt();
+          await installPrompt.userChoice;
+          installPrompt = null;
+          installAppButton.hidden = true;
+        });
+
+        toggleMode.addEventListener('click', () => {
+          desktopMode = !desktopMode;
+          phoneView.style.display = desktopMode ? 'none' : 'block';
+          desktopView.style.display = desktopMode ? 'block' : 'none';
+          toggleMode.textContent = desktopMode ? 'Switch to phone instructions' : 'Switch to computer instructions';
+        });
+
+        installAppButton.hidden = true;
+      </script>
+    </main>
+  </body>
+</html>

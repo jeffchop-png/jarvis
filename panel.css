@@ -1,0 +1,365 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  background: #050c15;
+  color: #d8f8ff;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 280px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(33, 156, 196, 0.26), transparent 28%),
+    radial-gradient(ellipse at 50% 38%, rgba(0, 110, 151, 0.18), transparent 54%),
+    linear-gradient(155deg, #07171f, #03080f 40%, #020b15 100%);
+}
+
+.interface {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 20px 15px;
+  background: linear-gradient(180deg, rgba(8, 18, 26, 0.1), rgba(4, 8, 14, 0.7));
+}
+
+.header,
+.footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.header {
+  padding: 2px 2px 0;
+}
+
+.controls,
+.manual-input-wrap {
+  width: min(100%, 470px);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin: 8px auto 0;
+}
+
+.action-button {
+  appearance: none;
+  border: 1px solid rgba(95, 222, 255, 0.35);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(49, 156, 170, 0.25), rgba(13, 51, 70, 0.7));
+  color: #edf6ff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  min-height: 42px;
+  padding: 0 18px;
+  text-transform: uppercase;
+  touch-action: manipulation;
+}
+
+.action-button.secondary {
+  background: rgba(12, 42, 55, 0.8);
+}
+
+.action-button:active {
+  transform: translateY(1px);
+}
+
+.manual-input-wrap {
+  margin-top: 12px;
+  padding: 0 12px;
+}
+
+#manual-input {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid rgba(112, 164, 182, 0.45);
+  border-radius: 12px;
+  background: rgba(4, 18, 28, 0.78);
+  color: #eaf5ff;
+  font: inherit;
+  padding: 0 14px;
+}
+
+.api-settings {
+  width: min(100%, 470px);
+  margin: 14px auto 18px;
+  color: #8fb9c5;
+  font-size: 12px;
+}
+
+.api-settings summary {
+  width: fit-content;
+  cursor: pointer;
+  color: #9dddeb;
+  min-height: 40px;
+  padding: 12px 4px;
+  touch-action: manipulation;
+}
+
+.api-settings form {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px 14px;
+  border: 1px solid rgba(83, 170, 199, 0.2);
+  border-radius: 14px;
+  background: rgba(7, 28, 38, 0.68);
+}
+
+.api-key-controls {
+  display: flex;
+  gap: 8px;
+}
+
+#api-key {
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+  border: 1px solid rgba(112, 164, 182, 0.45);
+  border-radius: 12px;
+  background: rgba(4, 18, 28, 0.78);
+  color: #eaf5ff;
+  font: inherit;
+  padding: 0 12px;
+}
+
+.api-key-status {
+  line-height: 1.5;
+}
+
+.api-settings a {
+  color: #9dddeb;
+  min-height: 36px;
+  padding-top: 8px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.brand {
+  color: #e5fbff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(114, 210, 255, 0.2);
+}
+
+.brand-dot {
+  color: #779ca7;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.system-state,
+.footer,
+.status,
+.orb-instruction {
+  font-family: Consolas, "Courier New", monospace;
+  letter-spacing: 0.12em;
+}
+
+.system-state {
+  color: #79a7b3;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.state-light {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #00e3b2;
+  box-shadow: 0 0 9px #00e3b2;
+}
+
+.stage {
+  width: min(100%, 420px);
+  height: min(52vh, 420px);
+  min-height: 240px;
+  margin: 18px auto 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 10px 8px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(18, 33, 42, 0.88), rgba(6, 18, 28, 0.88));
+  border: 1px solid rgba(108, 201, 233, 0.18);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.35), inset 0 0 26px rgba(29, 111, 145, 0.14);
+}
+
+#orb {
+  display: block;
+  width: 100%;
+  height: calc(100% - 25px);
+  min-height: 210px;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 12px 24px rgba(21, 91, 130, 0.42));
+  border-radius: 22px;
+}
+
+#orb:active {
+  cursor: grabbing;
+}
+
+#orb:focus-visible {
+  filter: drop-shadow(0 0 12px rgba(54, 222, 255, 0.6));
+}
+
+.orb-instruction {
+  color: #5c8591;
+  font-size: 8px;
+  text-align: center;
+}
+
+.orb-instruction span {
+  padding: 0 4px;
+  color: #12c8ea;
+}
+
+.conversation {
+  width: min(100%, 470px);
+  min-height: 135px;
+  margin: 12px auto 20px;
+  padding: 16px 16px 14px;
+  border: 1px solid rgba(83, 170, 199, 0.2);
+  border-radius: 18px;
+  background: linear-gradient(100deg, rgba(7, 28, 38, 0.68), rgba(9, 20, 32, 0.4));
+  box-shadow: inset 0 0 16px rgba(40, 126, 156, 0.08);
+}
+
+.status {
+  margin-bottom: 9px;
+  color: #4ca9bb;
+  font-size: 8px;
+}
+
+.transcript {
+  margin-bottom: 7px;
+  color: #77d4e1;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.transcript:empty {
+  display: none;
+}
+
+.answer {
+  color: #c6dce1;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.footer {
+  margin-top: auto;
+  color: #466973;
+  font-size: 7px;
+  line-height: 1.6;
+}
+
+.footer span:last-child {
+  text-align: right;
+}
+
+.footer span {
+  text-align: center;
+}
+
+body.is-listening .state-light {
+  background: #ff7086;
+  box-shadow: 0 0 10px #ff7086;
+}
+
+body.is-listening #orb {
+  filter: drop-shadow(0 0 12px rgba(35, 217, 255, 0.2));
+}
+
+@media (max-width: 480px) {
+  .interface {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .header,
+  .footer {
+    gap: 8px;
+  }
+
+  .brand {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+
+  .brand-dot {
+    display: none;
+  }
+
+  .controls,
+  .manual-input-wrap {
+    flex-direction: column;
+  }
+
+  .action-button,
+  #manual-input,
+  #manual-submit,
+  #api-key {
+    width: 100%;
+  }
+
+  .api-key-controls {
+    flex-direction: column;
+  }
+}
+
+@media (max-height: 600px) {
+  .interface {
+    padding-top: 14px;
+  }
+
+  .stage {
+    height: 42vh;
+    min-height: 170px;
+    margin-top: 8px;
+  }
+
+  #orb {
+    min-height: 150px;
+  }
+
+  .conversation {
+    min-height: 100px;
+    margin-top: 4px;
+    padding: 10px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}

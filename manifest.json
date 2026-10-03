@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Jarvis Voice Assistant",
+  "version": "1.0.0",
+  "description": "A voice-controlled browser assistant with tab management and live knowledge lookups.",
+  "permissions": [
+    "tabs",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://en.wikipedia.org/*",
+    "https://api.duckduckgo.com/*",
+    "https://www.google.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Jarvis assistant"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  }
+}
