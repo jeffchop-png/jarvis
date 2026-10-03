@@ -10,7 +10,7 @@ This is a static site; it does not need a server or a port when hosted. To publi
 2. In the repository, open **Settings → Pages** and set the source to **GitHub Actions**.
 3. The included workflow deploys the site whenever you push to either branch. Open the URL shown in the completed **Deploy to GitHub Pages** workflow to use Jarvis.
 
-The site is served over HTTPS, which browsers require for microphone access. In browser mode, each person must add their own Gemini API key under **Connect conversational AI** to use AI chat. The key stays in that person's browser and is sent directly to Google.
+The site is served over HTTPS, which browsers require for microphone access. Conversation uses a small AI model running on the user's device: there is no AI account, API key, paid AI service, or usage bill. The model downloads the first time someone chats (hundreds of MB; Wi-Fi is recommended), and needs a browser/device with WebGPU support. Chat messages are processed locally. The user's internet provider may charge for data; no model download or inference is hosted or paid for by this project.
 
 ## Install the extension
 
@@ -31,7 +31,7 @@ This project is designed to work best on a Motorola or other Android phone as a 
 
 The simplest route for your phone is to open the mobile app page and install it as a shortcut instead of trying to use the unpacked extension flow.
 
-In browser mode, Jarvis uses Google Gemini for open-ended conversation and keeps recent turns as context. Before chatting, open **Connect conversational AI**, create a Gemini API key in Google AI Studio, and save it in the browser. The key is stored in that browser's local storage and sent directly to Google; it is not sent to this project's web server. Use a restricted key, do not share it, and clear browser storage if you need to remove it. Gemini requires network access and may have usage limits or charges based on your Google account.
+In browser mode, Jarvis runs open-ended conversation on-device and keeps recent turns as context. The model and runtime are downloaded from public hosting the first time they are needed, so an internet connection and data may be used during setup; after that, inference is local. Conversation does not send prompts to an AI service. Speech recognition is provided by the browser and may send audio to the browser's configured speech service.
 
 Speech recognition is supplied by the browser and may send audio to the browser's configured speech service. Listening starts only after tapping the orb or microphone button. Closing the side panel or browser stops the listening session.
 
@@ -44,12 +44,12 @@ Speech recognition is supplied by the browser and may send audio to the browser'
 - “Search for [topic]” — opens Google in a new tab without replacing the current tab.
 - “Open [website]”
 - Chat naturally — statements get a conversational reply instead of triggering a web search.
-- Ask a question — retrieves a short, conversational summary from Wikipedia and DuckDuckGo Instant Answers when available.
+- Ask questions and chat naturally — responses are generated on-device.
 
 Spoken replies use the browser's available speech voices, preferring an English (UK) voice when one is installed, with a measured pace and lower pitch. The selected voice depends on your browser and device.
 
-The assistant can list, switch to, and close tabs across Chrome windows where the extension is enabled. It does not read private tab content, scrape Google results, or control tabs in other browser profiles.
+The extension can list, switch to, and close tabs across Chrome windows where it is enabled. The extension version does not use a paid AI API; open the web app for on-device AI conversation. It does not read private tab content, scrape Google results, or control tabs in other browser profiles.
 
 ## Knowledge and limitations
 
-Jarvis is powered by Google's Gemini model; it is not a model trained by this project. Its replies can be incomplete or wrong, so verify important information independently with primary sources. Voice input depends on browser support and may send audio to the browser's configured speech service.
+The on-device model can produce incomplete or incorrect replies, so verify important information independently with primary sources. Its quality and speed depend on the device. If WebGPU is unavailable, local AI conversation will not work on that device. Voice input depends on browser support and may send audio to the browser's configured speech service.

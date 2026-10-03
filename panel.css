@@ -93,14 +93,14 @@ body {
   padding: 0 14px;
 }
 
-.api-settings {
+.ai-settings {
   width: min(100%, 470px);
   margin: 14px auto 18px;
   color: #8fb9c5;
   font-size: 12px;
 }
 
-.api-settings summary {
+.ai-settings summary {
   width: fit-content;
   cursor: pointer;
   color: #9dddeb;
@@ -109,40 +109,20 @@ body {
   touch-action: manipulation;
 }
 
-.api-settings form {
-  display: grid;
-  gap: 8px;
+.ai-settings-content {
   padding: 10px 12px 14px;
   border: 1px solid rgba(83, 170, 199, 0.2);
   border-radius: 14px;
   background: rgba(7, 28, 38, 0.68);
 }
 
-.api-key-controls {
-  display: flex;
-  gap: 8px;
-}
-
-#api-key {
-  min-width: 0;
-  min-height: 44px;
-  flex: 1;
-  border: 1px solid rgba(112, 164, 182, 0.45);
-  border-radius: 12px;
-  background: rgba(4, 18, 28, 0.78);
-  color: #eaf5ff;
-  font: inherit;
-  padding: 0 12px;
-}
-
-.api-key-status {
+.ai-settings-content p {
+  margin: 0 0 8px;
   line-height: 1.5;
 }
 
-.api-settings a {
-  color: #9dddeb;
-  min-height: 36px;
-  padding-top: 8px;
+.local-ai-status {
+  line-height: 1.5;
 }
 
 .hidden {
@@ -325,13 +305,6 @@ body.is-listening #orb {
   .action-button,
   #manual-input,
   #manual-submit,
-  #api-key {
-    width: 100%;
-  }
-
-  .api-key-controls {
-    flex-direction: column;
-  }
 }
 
 @media (max-height: 600px) {

@@ -36,21 +36,16 @@
         <button id="manual-submit" class="action-button" type="button">Send</button>
       </div>
 
-      <details class="api-settings">
-        <summary>Connect conversational AI</summary>
-        <form id="api-key-form">
-          <label for="api-key">Google Gemini API key</label>
-          <div class="api-key-controls">
-            <input id="api-key" type="password" autocomplete="off" placeholder="Paste your API key" required />
-            <button class="action-button" type="submit">Save key</button>
-          </div>
-          <div id="api-key-status" class="api-key-status" role="status">Get a key from Google AI Studio. It stays in this browser and is sent directly to Google.</div>
-          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Get a Google Gemini API key</a>
-        </form>
+      <details id="ai-settings" class="ai-settings">
+        <summary>Free on-device conversation</summary>
+        <div class="ai-settings-content">
+          <p id="local-ai-description">Jarvis runs its conversation model on this device. No AI account, API key, or paid AI service is used. The first general conversation downloads the model (hundreds of MB); Wi-Fi is recommended. Your chat stays in this browser. Your internet provider may charge for data.</p>
+          <div id="local-ai-status" class="local-ai-status" role="status">The free model loads the first time you send a message.</div>
+        </div>
       </details>
 
       <footer class="footer">
-        <span>VOICE · GEMINI CONVERSATION · BROWSER COMMANDS</span>
+        <span>ON-DEVICE AI · NO API KEY · BROWSER COMMANDS</span>
       </footer>
     </main>
     <script src="panel.js"></script>

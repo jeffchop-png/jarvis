@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
-  handleCommand(message.text, Array.isArray(message.history) ? message.history : [], message.apiKey)
+  handleCommand(message.text)
     .then((response) => sendResponse(response))
     .catch((error) => {
       console.error("Jarvis command failed:", error);
@@ -30,7 +30,7 @@ function stripJarvisPrefix(text) {
     .trim();
 }
 
-async function handleCommand(rawText, history, apiKey) {
+async function handleCommand(rawText) {
   const text = stripJarvisPrefix(rawText);
   const normalized = text.toLowerCase();
   if (!text) return { text: "I didn't catch that. Say it again when you're ready." };
@@ -78,52 +78,9 @@ async function handleCommand(rawText, history, apiKey) {
     return { text: `I couldn't identify a website for ${target}, so I searched for it in a new tab.` };
   }
 
-  return { text: await generateGeminiReply(text, history, apiKey) };
-}
-
-async function generateGeminiReply(text, history, apiKey) {
-  if (typeof apiKey !== "string" || !apiKey.trim()) {
-    throw new Error("Connect Gemini first: open “Connect conversational AI” and add a Google AI Studio API key.");
-  }
-  const contents = history
-    .filter((turn) => ["user", "assistant"].includes(turn.role) && typeof turn.text === "string")
-    .slice(-12)
-    .map((turn) => ({
-      role: turn.role === "assistant" ? "model" : "user",
-      parts: [{ text: turn.text.slice(0, 4000) }]
-    }));
-  if (contents.at(-1)?.role !== "user" || contents.at(-1)?.parts[0].text !== text) {
-    contents.push({ role: "user", parts: [{ text: text.slice(0, 4000) }] });
-  }
-
-  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey.trim()
-    },
-    body: JSON.stringify({
-      systemInstruction: {
-        parts: [{
-          text: "You are Jarvis, a thoughtful, warm, natural conversational assistant. Respond to the person's actual meaning, use the conversation context, ask a follow-up only when useful, and avoid canned openings or repetitive phrasing. Be honest when uncertain. Keep spoken answers concise but provide detail when asked."
-        }]
-      },
-      contents,
-      generationConfig: { temperature: 0.85, maxOutputTokens: 700 }
-    })
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || `Gemini returned HTTP ${response.status}. Check the API key and Google AI Studio access.`);
-  }
-  const answer = data.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
-    .join("")
-    .trim();
-  if (!answer) {
-    throw new Error("Gemini did not return a reply. Try rephrasing your message.");
-  }
-  return answer;
+  return {
+    text: "This extension manages browser tabs, opens websites, and searches. For free on-device AI conversation, open the Jarvis web app."
+  };
 }
 
 function calculate(expression) {

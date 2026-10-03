@@ -9,13 +9,27 @@ const manualToggle = document.querySelector("#manual-toggle");
 const manualInputWrap = document.querySelector("#manual-input-wrap");
 const manualInput = document.querySelector("#manual-input");
 const manualSubmit = document.querySelector("#manual-submit");
-const apiKeyForm = document.querySelector("#api-key-form");
-const apiKeyInput = document.querySelector("#api-key");
-const apiKeyStatus = document.querySelector("#api-key-status");
+const localAiSettings = document.querySelector("#ai-settings");
+const localAiDescription = document.querySelector("#local-ai-description");
+const localAiStatus = document.querySelector("#local-ai-status");
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const conversation = [];
 const isExtensionContext = typeof chrome !== "undefined" && !!chrome.runtime && !!chrome.runtime.sendMessage;
-const apiKeyStorageName = "jarvisGeminiApiKey";
+const localAiModel = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+let localAiEngine;
+let localAiEnginePromise;
+
+try {
+  localStorage.removeItem("jarvisGeminiApiKey");
+} catch (error) {
+  console.warn("Could not remove a previously saved AI API key:", error);
+}
+
+if (isExtensionContext) {
+  localAiSettings.querySelector("summary").textContent = "Free AI conversation is on the web app";
+  localAiDescription.textContent = "The extension handles browser commands. Open the Jarvis web app for free on-device AI conversation; no API key or paid AI service is needed.";
+  localAiStatus.textContent = "The extension does not send messages to a paid AI service.";
+}
 
 const particleCount = 520;
 const particles = Array.from({ length: particleCount }, (_, index) => {
@@ -465,8 +479,7 @@ async function processVoiceInput(text) {
     const response = await chrome.runtime.sendMessage({
       type: "voice-command",
       text,
-      history: conversation.slice(-12),
-      apiKey: localStorage.getItem(apiKeyStorageName)
+      history: conversation.slice(-12)
     });
     if (!response || typeof response.text !== "string") {
       throw new Error("The assistant returned an invalid response.");
@@ -478,9 +491,70 @@ async function processVoiceInput(text) {
     speak(response.text);
   } catch (error) {
     responding = false;
-    showError("I couldn't reach the assistant", error);
+    showError(
+      isExtensionContext ? "Browser command failed" : "On-device conversation is unavailable",
+      error
+    );
     restartListening();
   }
+}
+
+async function requestLocalAIReply(text, history) {
+  if (!navigator.gpu) {
+    throw new Error("This browser or device does not support WebGPU. Try a recent Chrome browser on a supported device.");
+  }
+
+  if (!localAiEnginePromise) {
+    localAiEnginePromise = (async () => {
+      localAiSettings.open = true;
+      localAiStatus.textContent = "Downloading the free on-device AI model. Use Wi-Fi if possible.";
+      statusLine.textContent = "DOWNLOADING FREE ON-DEVICE AI";
+      systemState.textContent = "LOADING AI";
+      const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+      localAiEngine = await CreateMLCEngine(localAiModel, {
+        initProgressCallback: ({ text: progressText, progress }) => {
+          const percent = Number.isFinite(progress) ? ` ${Math.round(progress * 100)}%` : "";
+          localAiStatus.textContent = `${progressText || "Preparing on-device AI"}${percent}`;
+          statusLine.textContent = `${progressText || "PREPARING ON-DEVICE AI"}${percent}`.toUpperCase();
+        }
+      });
+      localAiStatus.textContent = "Free on-device AI is ready. Your messages are processed on this device.";
+      statusLine.textContent = "THINKING";
+      systemState.textContent = "PROCESSING";
+      return localAiEngine;
+    })().catch((error) => {
+      localAiEnginePromise = null;
+      localAiEngine = null;
+      localAiStatus.textContent = `Could not load on-device AI: ${error.message}`;
+      throw error;
+    });
+  }
+
+  const engine = await localAiEnginePromise;
+  const messages = [
+    {
+      role: "system",
+      content: "You are Jarvis, a thoughtful, warm, natural conversational assistant. Respond to the person's actual meaning, use the conversation context, ask a follow-up only when useful, and avoid canned openings or repetitive phrasing. Be honest when uncertain. Keep spoken answers concise but provide detail when asked."
+    },
+    ...history
+      .filter((turn) => ["user", "assistant"].includes(turn.role) && typeof turn.text === "string")
+      .slice(-12)
+      .map((turn) => ({ role: turn.role, content: turn.text.slice(0, 1500) }))
+  ];
+  if (messages.at(-1)?.role !== "user" || messages.at(-1)?.content !== text) {
+    messages.push({ role: "user", content: text.slice(0, 1500) });
+  }
+
+  const response = await engine.chat.completions.create({
+    messages,
+    temperature: 0.7,
+    max_tokens: 350
+  });
+  const answer = response.choices?.[0]?.message?.content?.trim();
+  if (!answer) {
+    throw new Error("The on-device model did not return a reply. Try rephrasing your message.");
+  }
+  return answer;
 }
 
 async function browserFallbackReply(text) {
@@ -518,133 +592,7 @@ async function browserFallbackReply(text) {
     return "This browser mode cannot directly manage Chrome tabs or the extension panel on mobile. It works best for chat, quick searches, and simple local voice commands.";
   }
 
-  return requestGeminiReply(raw, conversation, localStorage.getItem(apiKeyStorageName));
-}
-
-async function requestGeminiReply(text, history, apiKey) {
-  if (!apiKey) {
-    throw new Error("Connect Gemini first: open “Connect conversational AI” and add a Google AI Studio API key.");
-  }
-  const contents = history
-    .filter((turn) => ["user", "assistant"].includes(turn.role) && typeof turn.text === "string")
-    .slice(-12)
-    .map((turn) => ({
-      role: turn.role === "assistant" ? "model" : "user",
-      parts: [{ text: turn.text.slice(0, 4000) }]
-    }));
-  if (contents.at(-1)?.role !== "user" || contents.at(-1)?.parts[0].text !== text) {
-    contents.push({ role: "user", parts: [{ text: text.slice(0, 4000) }] });
-  }
-
-  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey
-    },
-    body: JSON.stringify({
-      systemInstruction: {
-        parts: [{
-          text: "You are Jarvis, a thoughtful, warm, natural conversational assistant. Respond to the person's actual meaning, use the conversation context, ask a follow-up only when useful, and avoid canned openings or repetitive phrasing. Be honest when uncertain. Keep spoken answers concise but provide detail when asked."
-        }]
-      },
-      contents,
-      generationConfig: { temperature: 0.85, maxOutputTokens: 700 }
-    })
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || `Gemini returned HTTP ${response.status}. Check the API key and Google AI Studio access.`);
-  }
-  const answer = data.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
-    .join("")
-    .trim();
-  if (!answer) {
-    throw new Error("Gemini did not return a reply. Try rephrasing your message.");
-  }
-  return answer;
-}
-
-async function summarizeGeneralQuestion(question) {
-  const [wikipediaResult, duckDuckGoResult] = await Promise.allSettled([
-    searchWikipedia(question),
-    searchDuckDuckGo(question)
-  ]);
-
-  const parts = [];
-  if (wikipediaResult.status === "fulfilled" && wikipediaResult.value) parts.push(wikipediaResult.value);
-  if (duckDuckGoResult.status === "fulfilled" && duckDuckGoResult.value) parts.push(duckDuckGoResult.value);
-
-  if (parts.length > 0) {
-    return paraphraseFindings(parts);
-  }
-
-  const query = encodeURIComponent(question);
-  window.open(`https://www.google.com/search?q=${query}`, "_blank", "noopener");
-  return `I searched the web for “${question}” and opened the results for you. Ask me a more direct question, and I’ll summarize the answer for you.`;
-}
-
-function paraphraseFindings(parts) {
-  const sources = parts.map((part) => part.match(/^(Wikipedia|DuckDuckGo):/i)?.[1]).filter(Boolean);
-  const text = parts
-    .map((part) => part
-      .replace(/^(Wikipedia|DuckDuckGo):\s*/i, "")
-      .replace(/\s*\(https?:\/\/[^)]+\)/gi, "")
-      .replace(/https?:\/\/\S+/gi, "")
-      .trim())
-    .filter(Boolean)
-    .join(" ");
-  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [];
-  let summary = sentences.slice(0, 3).join(" ").trim();
-  if (summary.length > 480) {
-    summary = `${summary.slice(0, 477).replace(/\s+\S*$/, "")}…`;
-  }
-  const sourceNames = [...new Set(sources)].join(" and ");
-  return summary
-    ? `Here's the short version${sourceNames ? `, based on ${sourceNames}` : ""}: ${summary}`
-    : "I found a couple of useful sources, but they didn't give me a clear summary.";
-}
-
-async function searchWikipedia(question) {
-  const params = new URLSearchParams({
-    action: "query",
-    generator: "search",
-    gsrsearch: question,
-    gsrlimit: "2",
-    prop: "extracts",
-    exintro: "1",
-    explaintext: "1",
-    exchars: "500",
-    format: "json",
-    origin: "*"
-  });
-
-  const response = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
-  if (!response.ok) throw new Error(`Wikipedia returned ${response.status}`);
-  const data = await response.json();
-  const pages = Object.values(data.query?.pages || {});
-  const text = pages
-    .filter((page) => page.extract)
-    .slice(0, 2)
-    .map((page) => `${page.title}: ${page.extract}`)
-    .join(" ");
-  return text ? `Wikipedia: ${text}` : "";
-}
-
-async function searchDuckDuckGo(question) {
-  const params = new URLSearchParams({
-    q: question,
-    format: "json",
-    no_html: "1",
-    skip_disambig: "1"
-  });
-
-  const response = await fetch(`https://api.duckduckgo.com/?${params}`);
-  if (!response.ok) throw new Error(`DuckDuckGo returned ${response.status}`);
-  const data = await response.json();
-  const text = [data.Answer, data.AbstractText].filter((item) => typeof item === "string" && item.trim()).slice(0, 2).join(" ");
-  return text ? `DuckDuckGo: ${text}${data.AbstractURL ? ` (${data.AbstractURL})` : ""}` : "";
+  return requestLocalAIReply(raw, conversation);
 }
 
 function stopListening() {
