@@ -6,6 +6,7 @@ const transcriptLine = document.querySelector("#transcript");
 const answerLine = document.querySelector("#answer");
 const voiceToggle = document.querySelector("#voice-toggle");
 const manualToggle = document.querySelector("#manual-toggle");
+const geminiToggle = document.querySelector("#gemini-toggle");
 const manualInputWrap = document.querySelector("#manual-input-wrap");
 const manualInput = document.querySelector("#manual-input");
 const manualSubmit = document.querySelector("#manual-submit");
@@ -18,6 +19,7 @@ const isExtensionContext = typeof chrome !== "undefined" && !!chrome.runtime && 
 const localAiModel = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 let localAiEngine;
 let localAiEnginePromise;
+let lastUserPrompt = "";
 
 try {
   localStorage.removeItem("jarvisGeminiApiKey");
@@ -27,7 +29,7 @@ try {
 
 if (isExtensionContext) {
   localAiSettings.querySelector("summary").textContent = "Free AI conversation is on the web app";
-  localAiDescription.textContent = "The extension handles browser commands. Open the Jarvis web app for free on-device AI conversation; no API key or paid AI service is needed.";
+  localAiDescription.textContent = "The extension handles browser commands. Use Gemini to open Google's Gemini app or website instead; your last message is copied for you to paste there and is not sent automatically.";
   localAiStatus.textContent = "The extension does not send messages to a paid AI service.";
 }
 
@@ -297,6 +299,31 @@ manualToggle.addEventListener("click", () => {
   toggleManualInput();
 });
 
+geminiToggle.addEventListener("click", async () => {
+  window.open("https://gemini.google.com/app", "_blank", "noopener,noreferrer");
+  if (!lastUserPrompt) {
+    statusLine.textContent = "GEMINI OPENED";
+    answerLine.textContent = "Gemini is open. Type your message there to start a conversation.";
+    return;
+  }
+
+  if (!navigator.clipboard?.writeText) {
+    statusLine.textContent = "GEMINI OPENED — COPY UNAVAILABLE";
+    answerLine.textContent = "Gemini is open, but this browser cannot copy your last message automatically. Copy it from the transcript and paste it into Gemini.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(lastUserPrompt);
+    statusLine.textContent = "MESSAGE COPIED FOR GEMINI";
+    answerLine.textContent = "Gemini is open and your last message is copied. Paste it there to continue; Jarvis does not send it automatically.";
+  } catch (error) {
+    console.warn("Could not copy the last message for Gemini:", error);
+    statusLine.textContent = "GEMINI OPENED — COPY FAILED";
+    answerLine.textContent = "Gemini is open, but this browser could not copy your last message. Copy it from the transcript and paste it into Gemini.";
+  }
+});
+
 if (!manualInputWrap.classList.contains("hidden")) {
   manualToggle.textContent = "Hide messages";
   manualToggle.setAttribute("aria-expanded", "true");
@@ -445,6 +472,7 @@ function cleanCommandText(text) {
 
 async function processVoiceInput(text) {
   const cleanText = cleanCommandText(text);
+  lastUserPrompt = cleanText || text;
   transcriptLine.textContent = `YOU  /  ${cleanText || text}`;
   statusLine.textContent = "THINKING";
   systemState.textContent = "PROCESSING";
@@ -455,7 +483,10 @@ async function processVoiceInput(text) {
 
   try {
     if (!isExtensionContext) {
-      const response = await browserFallbackReply(cleanText || text);
+      const response = await browserFallbackReply(cleanText || text, (partial) => {
+        answerLine.textContent = partial;
+        statusLine.textContent = "JARVIS IS RESPONDING";
+      });
       conversation.push({ role: "assistant", text: response });
       answerLine.textContent = response;
       statusLine.textContent = "JARVIS";
@@ -487,7 +518,7 @@ async function processVoiceInput(text) {
   }
 }
 
-async function requestLocalAIReply(text, history) {
+async function requestLocalAIReply(text, history, onProgress) {
   if (!navigator.gpu) {
     throw new Error("This browser or device does not support WebGPU. Try a recent Chrome browser on a supported device.");
   }
@@ -526,8 +557,8 @@ async function requestLocalAIReply(text, history) {
     },
     ...history
       .filter((turn) => ["user", "assistant"].includes(turn.role) && typeof turn.text === "string")
-      .slice(-12)
-      .map((turn) => ({ role: turn.role, content: turn.text.slice(0, 1500) }))
+      .slice(-6)
+      .map((turn) => ({ role: turn.role, content: turn.text.slice(0, 800) }))
   ];
   if (messages.at(-1)?.role !== "user" || messages.at(-1)?.content !== text) {
     messages.push({ role: "user", content: text.slice(0, 1500) });
@@ -536,16 +567,25 @@ async function requestLocalAIReply(text, history) {
   const response = await engine.chat.completions.create({
     messages,
     temperature: 0.7,
-    max_tokens: 350
+    max_tokens: 192,
+    stream: true
   });
-  const answer = response.choices?.[0]?.message?.content?.trim();
+  let answer = "";
+  for await (const chunk of response) {
+    const content = chunk.choices?.[0]?.delta?.content;
+    if (typeof content === "string" && content) {
+      answer += content;
+      onProgress(answer);
+    }
+  }
+  answer = answer.trim();
   if (!answer) {
     throw new Error("The on-device model did not return a reply. Try rephrasing your message.");
   }
   return answer;
 }
 
-async function browserFallbackReply(text) {
+async function browserFallbackReply(text, onProgress = () => {}) {
   const raw = cleanCommandText(text);
   if (!raw) return "I didn’t catch that. Please try again.";
 
@@ -580,7 +620,7 @@ async function browserFallbackReply(text) {
     return "This browser mode cannot directly manage Chrome tabs or the extension panel on mobile. It works best for chat, quick searches, and simple local voice commands.";
   }
 
-  return requestLocalAIReply(raw, conversation);
+  return requestLocalAIReply(raw, conversation, onProgress);
 }
 
 function stopListening() {

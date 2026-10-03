@@ -33,6 +33,10 @@ The simplest route for your phone is to open the mobile app page and install it 
 
 In browser mode, Jarvis runs open-ended conversation on-device and keeps recent turns as context. The model and runtime are downloaded from public hosting the first time they are needed, so an internet connection and data may be used during setup; after that, inference is local. Conversation does not send prompts to an AI service. Speech recognition is provided by the browser and may send audio to the browser's configured speech service.
 
+Text replies appear as the model generates them, while spoken playback starts once the reply is complete. Response speed still depends on the device, and the first use may take longer while the model downloads and initializes.
+
+To avoid waiting for the local model, choose **Use Gemini** to open Google's Gemini app or website. Jarvis copies your last message so you can paste it there; it does not send the message automatically or connect to the Gemini API. Gemini handles that conversation under your Google account and its own privacy and availability terms.
+
 Speech recognition is supplied by the browser and may send audio to the browser's configured speech service. Listening starts only after tapping the orb or microphone button. Closing the side panel or browser stops the listening session.
 
 ## Conversation and voice
