@@ -315,18 +315,6 @@ manualInput.addEventListener("keydown", (event) => {
   }
 });
 
-apiKeyStatus.textContent = localStorage.getItem(apiKeyStorageName)
-  ? "A Gemini API key is saved in this browser."
-  : "Get a key from Google AI Studio. It stays in this browser and is sent directly to Google.";
-apiKeyForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const apiKey = apiKeyInput.value.trim();
-  if (!apiKey) return;
-  localStorage.setItem(apiKeyStorageName, apiKey);
-  apiKeyInput.value = "";
-  apiKeyStatus.textContent = "API key saved in this browser. You can now have a conversation.";
-});
-
 if (!isExtensionContext) {
   systemState.textContent = "BROWSER MODE";
   statusLine.textContent = "READY TO CHAT";
